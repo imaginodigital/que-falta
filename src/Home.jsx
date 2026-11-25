@@ -5,6 +5,7 @@ import { IconInvite, IconPencil, IconSettings, IconTrash } from './icons'
 import { APP_NAME, shareAppText } from './config'
 import { useRefreshOnReturn } from './live'
 import NameForm from './NameForm'
+import PasswordForm from './PasswordForm'
 import ConfirmSheet from './ConfirmSheet'
 
 // Pantalla principal: todas las listas a las que perteneces.
@@ -15,6 +16,7 @@ export default function Home({ session, myName, onNameChange }) {
   const [loadError, setLoadError] = useState('')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [confirmLogout, setConfirmLogout] = useState(false)
+  const [changingPw, setChangingPw] = useState(false)
   const [showNames, setShowNames] = useState(true)
   const [contacts, setContacts] = useState([]) // [{ id, name }]
   const [picked, setPicked] = useState([]) // ids de contactos elegidos al crear
@@ -277,7 +279,7 @@ export default function Home({ session, myName, onNameChange }) {
       </main>
 
       {settingsOpen && (
-        <div className="sheet-backdrop" onClick={() => setSettingsOpen(false)}>
+        <div className="sheet-backdrop" onClick={() => { setSettingsOpen(false); setChangingPw(false) }}>
           <div className="sheet" role="dialog" aria-modal="true" aria-label="Ajustes" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-handle" />
             <h2 className="sheet-title">Ajustes</h2>
@@ -288,6 +290,15 @@ export default function Home({ session, myName, onNameChange }) {
               submitLabel="Guardar nombre"
               onSaved={(n) => { onNameChange(n); setSettingsOpen(false) }}
             />
+            <p className="field-label modal-section">Contraseña</p>
+            {changingPw ? (
+              <PasswordForm
+                autoFocus
+                onSaved={() => { setChangingPw(false); setSettingsOpen(false); setToast('Contraseña guardada') }}
+              />
+            ) : (
+              <button className="pill outline block" onClick={() => setChangingPw(true)}>Cambiar contraseña</button>
+            )}
             <p className="sheet-account muted">Sesión iniciada como {session.user.email}</p>
             <button
               className="pill outline block"
@@ -296,7 +307,7 @@ export default function Home({ session, myName, onNameChange }) {
               Cerrar sesión
             </button>
             <div className="modal-footer">
-              <button className="pill outline sm" onClick={() => setSettingsOpen(false)}>Cerrar</button>
+              <button className="pill outline sm" onClick={() => { setSettingsOpen(false); setChangingPw(false) }}>Cerrar</button>
             </div>
           </div>
         </div>
@@ -344,7 +355,7 @@ export default function Home({ session, myName, onNameChange }) {
       {confirmLogout && (
         <ConfirmSheet
           title="Cerrar sesión"
-          message="Vas a salir de la app en este dispositivo. Para volver a entrar te enviaremos un enlace a tu correo."
+          message="Vas a salir de la app en este dispositivo. Para volver a entrar necesitarás tu correo y tu contraseña."
           confirmLabel="Cerrar sesión"
           onConfirm={() => supabase.auth.signOut()}
           onClose={() => setConfirmLogout(false)}

@@ -18,8 +18,10 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import ItemSheet from './ItemSheet'
 import ConfirmSheet from './ConfirmSheet'
-import { IconBack, IconCheck, IconDots, IconExport, IconGrip, IconHistory, IconPrint, IconRefresh, IconSettings, IconShareNodes, IconSort } from './icons'
+import { IconBack, IconCheck, IconExport, IconGrip, IconHistory, IconPencil, IconPrint, IconRefresh, IconSettings, IconShareNodes, IconSortAZ } from './icons'
 import ExportSheet from './ExportSheet'
+import DuplicateSheet from './DuplicateSheet'
+import { findDuplicate } from './itemMatch'
 import PrintView from './PrintView'
 import { buildDoc } from './exporter'
 import HistorySheet from './HistorySheet'
@@ -66,6 +68,7 @@ export default function ListView({ listId, session }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [duplicate, setDuplicate] = useState(null) // { name, existing } al escribir algo repetido
   const [missing, setMissing] = useState(false) // la lista ya no existe o saliste
   const [activity, setActivity] = useState([]) // avisos: "Pato salió de la lista"
   const itemIds = useRef(new Set())
@@ -166,9 +169,16 @@ export default function ListView({ listId, session }) {
 
   async function addItem(e) {
     e.preventDefault()
-    const name = newItem.trim()
+    const name = newItem.trim().replace(/\s+/g, ' ')
     if (!name) return
+    // ¿Ya está en la lista? (sin importar tildes, mayúsculas ni plural)
+    const existing = findDuplicate(items, name)
+    if (existing) return setDuplicate({ name, existing })
     setNewItem('')
+    await insertItem(name)
+  }
+
+  async function insertItem(name) {
     const maxPos = items.reduce((m, i) => Math.max(m, i.position ?? 0), 0)
     const { error } = await supabase.from('items').insert({
       list_id: listId,
@@ -370,10 +380,14 @@ export default function ListView({ listId, session }) {
         </form>
 
         <div className="toolbar">
-          <button className="pill outline sm" onClick={sortAlpha} disabled={list.sort_mode === 'alpha'}>
-            <IconSort width={16} height={16} />
-            <span className="label-long">Ordenar alfabéticamente</span>
-            <span className="label-short">Ordenar A–Z</span>
+          <button
+            className="round-btn"
+            onClick={sortAlpha}
+            disabled={list.sort_mode === 'alpha'}
+            aria-label="Ordenar alfabéticamente"
+            title={list.sort_mode === 'alpha' ? 'Ya está en orden alfabético' : 'Ordenar alfabéticamente'}
+          >
+            <IconSortAZ width={20} height={20} />
           </button>
           <div className="toolbar-icons">
             <button className="round-btn" onClick={() => setExportOpen(true)} aria-label="Exportar lista" title="Exportar">
@@ -459,6 +473,31 @@ export default function ListView({ listId, session }) {
 
       <PrintView doc={printDoc} />
 
+      {duplicate && (
+        <DuplicateSheet
+          name={duplicate.name}
+          existing={duplicate.existing}
+          onClose={() => setDuplicate(null)}
+          onAddAnyway={async () => {
+            setDuplicate(null)
+            setNewItem('')
+            await insertItem(duplicate.name)
+          }}
+          onIncrease={async () => {
+            setDuplicate(null)
+            setNewItem('')
+            await setQuantity(duplicate.existing, duplicate.existing.quantity + 1)
+            setToast(`«${duplicate.existing.name}» quedó con cantidad ${duplicate.existing.quantity + 1}`)
+          }}
+          onRestore={async () => {
+            setDuplicate(null)
+            setNewItem('')
+            await toggleBought(duplicate.existing)
+            setToast(`«${duplicate.existing.name}» volvió a pendientes`)
+          }}
+        />
+      )}
+
       {historyOpen && (
         <HistorySheet
           listId={listId}
@@ -541,8 +580,8 @@ function Row({ item, by, onToggle, onQty, onMenu }) {
         <button className="qty-btn" onClick={() => onQty(item, item.quantity + 1)} aria-label="Sumar uno">+</button>
       </div>
 
-      <button className="icon-btn" onClick={() => onMenu(item)} aria-label={`Opciones de ${item.name}`}>
-        <IconDots />
+      <button className="icon-btn" onClick={() => onMenu(item)} aria-label={`Editar ${item.name}`} title="Editar">
+        <IconPencil width={18} height={18} />
       </button>
       <button className="drag" {...listeners} aria-label="Arrastrar para reordenar">
         <IconGrip />

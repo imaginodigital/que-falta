@@ -25,6 +25,6 @@ export function shareAppText() {
     '• Toca Compartir (cuadrado con flecha ↑)',
     '• Toca "Agregar a inicio"',
     '',
-    'Para entrar, escribe tu correo y abre el enlace que te llega. No necesitas contraseña.',
+    'La primera vez, toca "Crear cuenta" y elige una contraseña. Después la app queda abierta.',
   ].join('\n')
 }

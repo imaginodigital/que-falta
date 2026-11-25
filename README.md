@@ -11,12 +11,13 @@ Cuando alguien agrega algo o lo marca como listo, se actualiza al instante en el
 - **Compartir fácil.** Por enlace (WhatsApp, correo…) o invitando directo a tus contactos, que reciben una invitación para aceptar o rechazar.
 - **Pendientes arriba, listos abajo.** Orden alfabético automático, o arrastrando para ordenar a mano.
 - **Cantidades** por artículo, edición, borrado y **mover artículos** a otra lista.
+- **Aviso de repetidos:** si escribes algo que ya está (aunque sea sin tilde o en plural, como "pimenton" o "Pimentones"), ofrece sumar a la cantidad o, si ya estaba listo, volverlo a pendientes.
 - **Quién lo marcó** como listo (opcional por lista) y **última actualización**.
 - **Historial** de las últimas acciones, agrupadas de forma inteligente: si alguien agrega 10 artículos seguidos se ve como una sola acción, y los toques por error no aparecen.
 - **Exportar** lo pendiente como texto o PDF, e **imprimir** una versión limpia.
 - **Permisos:** solo quien creó la lista puede renombrarla o borrarla; los demás pueden salir de ella.
 - **Instalable en el teléfono** como app (PWA), sin pasar por una tienda.
-- **Entrada sin contraseña:** se ingresa con un enlace que llega al correo.
+- **Cuenta con correo y contraseña,** sin pasos de confirmación. La sesión queda abierta en el teléfono hasta que la persona la cierre, y se puede recuperar la contraseña por correo.
 
 ## Tecnologías
 
@@ -44,7 +45,7 @@ Cuando alguien agrega algo o lo marca como listo, se actualiza al instante en el
    npm install
    ```
 2. **Crear la base de datos.** En Supabase, crea un proyecto y abre *SQL Editor → New query*. Pega el contenido de [`supabase/schema.sql`](supabase/schema.sql) y dale *Run*.
-3. **Configurar el inicio de sesión.** En *Authentication → URL Configuration*, agrega `http://localhost:5173` a *Redirect URLs*.
+3. **Configurar el inicio de sesión.** En *Authentication → Sign In / Providers → Email*, desactiva **Confirm email** (así se entra apenas se crea la cuenta). En *Authentication → URL Configuration*, agrega `http://localhost:5173/**` a *Redirect URLs* (lo usa el correo de recuperar contraseña).
 4. **Variables de entorno.** Copia `.env.example` como `.env.local` y completa la URL del proyecto y la *publishable key* (en *Project Settings → API*).
 5. **Iniciar**
    ```bash
@@ -56,14 +57,14 @@ Cuando alguien agrega algo o lo marca como listo, se actualiza al instante en el
 
 1. Importa el repositorio en [Vercel](https://vercel.com).
 2. En *Environment Variables* agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
-3. Después del primer deploy, en Supabase (*Authentication → URL Configuration*) pon la dirección de Vercel en *Site URL* y en *Redirect URLs*.
+3. Después del primer deploy, en Supabase (*Authentication → URL Configuration*) pon la dirección de Vercel en *Site URL* y agrégala a *Redirect URLs* terminada en `/**`.
 
-> El correo gratuito de Supabase permite pocos envíos por hora. Para uso real conviene configurar un SMTP propio (por ejemplo, Gmail o Brevo) en *Authentication → Emails → SMTP Settings*.
+> Los únicos correos que envía la app son los de recuperar contraseña. El servicio de correo gratuito de Supabase permite pocos envíos por hora; si la app crece, conviene configurar un SMTP propio en *Authentication → Emails → SMTP Settings*.
 
 ## Pruebas
 
 ```bash
-npm test     # pruebas del agrupamiento del historial
+npm test     # pruebas del historial y de la detección de repetidos
 npm run lint # revisión del código
 ```
 
@@ -73,6 +74,7 @@ npm run lint # revisión del código
 supabase/schema.sql   Base de datos completa: tablas, seguridad, funciones y tiempo real
 src/
   App.jsx             Sesión, nombre del usuario y navegación
+  Auth.jsx            Entrar, crear cuenta y recuperar contraseña
   Home.jsx            Mis listas, crear lista, invitaciones, ajustes
   ListView.jsx        Una lista: artículos, orden, listos, barra de acciones
   ItemSheet.jsx       Opciones de un artículo (editar, mover, borrar)
@@ -80,6 +82,8 @@ src/
   ListSettings.jsx    Ajustes de la lista (nombre, quién marcó, salir/borrar)
   HistorySheet.jsx    Ventana del historial
   history.js          Agrupamiento del historial (+ history.test.js)
+  itemMatch.js        Detección de artículos repetidos (+ itemMatch.test.js)
+  DuplicateSheet.jsx  Aviso de artículo repetido
   ExportSheet.jsx     Exportar como texto o PDF
   exporter.js         Arma el texto y el PDF
   PrintView.jsx       Versión para imprimir

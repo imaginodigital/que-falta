@@ -14,11 +14,6 @@ const base = {
 export const IconCheck = (p) => (
   <svg {...base} {...p}><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
 )
-export const IconDots = (p) => (
-  <svg {...base} {...p} fill="currentColor" stroke="none">
-    <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
-  </svg>
-)
 export const IconGrip = (p) => (
   <svg {...base} {...p} fill="currentColor" stroke="none">
     <circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" />
@@ -44,8 +39,12 @@ export const IconShare = (p) => (
 export const IconPlus = (p) => (
   <svg {...base} {...p}><path d="M12 5v14M5 12h14" /></svg>
 )
-export const IconSort = (p) => (
-  <svg {...base} {...p}><path d="M7 4v16M4 17l3 3 3-3" /><path d="M14 6h6M14 12h4M14 18h2" /></svg>
+export const IconSortAZ = (p) => (
+  <svg {...base} {...p} strokeWidth={1.8}>
+    <path d="M4 10.5L6.75 3.5l2.75 7M5 8.25h3.5" />
+    <path d="M4.25 13.5h5l-5 7h5" />
+    <path d="M17 4v16M13.5 16.5L17 20l3.5-3.5" />
+  </svg>
 )
 export const IconRefresh = (p) => (
   <svg {...base} {...p}><path d="M20 12a8 8 0 1 1-2.4-5.7" /><path d="M20 4v5h-5" /></svg>
