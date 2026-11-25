@@ -1,0 +1,30 @@
+{
+  "name": "Qué Falta",
+  "short_name": "Qué Falta",
+  "description": "Listas compartidas: compras, pendientes y más",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ede7e2",
+  "theme_color": "#f5ff7d",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/"
+}
